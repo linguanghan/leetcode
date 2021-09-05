@@ -534,3 +534,195 @@ class Solution {
 }
 ```
 
+### （三）树
+
+#### 1、二叉树的遍历
+
+##### [1.1、二叉树的锯齿形层序遍历](https://leetcode-cn.com/problems/binary-tree-zigzag-level-order-traversal/)
+
+思路：用一个队列来进行bfs
+
+```java
+class Solution {
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+       List<List<Integer>> res = new ArrayList<>();
+       if(root == null) {
+           return res;
+       }
+       
+       Queue<TreeNode> queue = new LinkedList<>();
+       queue.offer(root);
+       int flag = 0;
+       while(!queue.isEmpty()){
+           int size = queue.size();
+           List<Integer> list = new ArrayList<>();
+           for(int i = 0;i < size;i++){
+               TreeNode temp = queue.poll();
+               if(flag == 0){
+                   list.add(temp.val);
+               }else{
+                   list.add(0, temp.val);
+               }
+
+               if(temp.left != null){
+                   queue.offer(temp.left);
+               }
+
+               if(temp.right != null){
+                   queue.offer(temp.right);
+               }
+           }
+
+           flag = flag == 0 ? 1 : 0;
+           res.add(list);
+       }
+
+       return res; 
+
+    }
+}
+```
+
+##### [1.2、二叉树的右视图](https://leetcode-cn.com/problems/binary-tree-right-side-view/)
+
+层序遍历取最后一个
+
+```java
+class Solution {
+    
+    public List<Integer> rightSideView(TreeNode root) {
+        List<List<Integer>> lists = new ArrayList<>();
+        Queue<TreeNode> queue = new LinkedList<>();
+        List<Integer> res = new ArrayList<>();
+        if(root == null){
+            return res;
+        }
+        queue.offer(root);
+
+        while(!queue.isEmpty()){
+            int size = queue.size();
+            for(int i = 0;i < size;i++){
+                TreeNode temp = queue.poll();
+                if(i == size - 1){
+                    res.add(temp.val);
+                }
+
+                if(temp.left != null){
+                    queue.offer(temp.left);
+                }
+
+                if(temp.right != null){
+                    queue.offer(temp.right);
+                }
+            }
+        }
+
+        return res;
+    }
+}
+```
+
+#### 2、最近公共祖先
+
+```java
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if(root == null || root == p || root == q){
+            return root;
+        }
+
+        TreeNode left = lowestCommonAncestor(root.left, p, q);
+        TreeNode right = lowestCommonAncestor(root.right, p, q);
+		//后序遍历发现都不为空：该root就是最近的公共祖先
+        if(left != null && right != null){
+            return root;
+        }
+		//后序遍历发现都为空，返回null
+        if(left == null && right == null){
+            return null;
+        }
+		//后序遍历发现左边为空，那么公共祖先就是右子树（两个节点都在右子树），反之都在左子树
+        return left == null ? right : left;
+    }
+}
+```
+
+#### 3、构造二叉树
+
+##### [3.1、从中序与后序遍历序列构造二叉树](https://leetcode-cn.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/)
+
+```java
+class Solution {
+    public TreeNode buildTree(int[] inorder, int[] postorder) {
+        if(inorder == null || postorder == null || inorder.length == 0 || postorder.length == 0){
+            return null;
+        }
+
+        return build(inorder, postorder, 0, inorder.length - 1, 0, postorder.length - 1);
+    }
+
+    public TreeNode build(int[] inorder, int[] postorder, int inLeft, int inRight, int postLeft, int postRight){
+        if(inLeft > inRight){
+            return null;
+        }
+
+        int key = postorder[postRight];
+        int index = 0;
+
+        for(int i = 0;i <= inRight;i++){
+            if(key == inorder[i]){
+                index = i;
+                break;
+            }
+        }
+
+        int rightLength = inRight - index;
+
+        TreeNode root = new TreeNode(key);
+
+        root.left = build(inorder, postorder, inLeft, index - 1, postLeft,  postRight - rightLength - 1);
+        root.right = build(inorder, postorder, index + 1, inRight, postRight - rightLength, postRight - 1);
+
+        return root;
+
+    }   
+}
+```
+
+##### [3.2、从前序与中序遍历序列构造二叉树](https://leetcode-cn.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/)
+
+```java
+class Solution {
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        if(preorder == null || inorder == null || preorder.length == 0 || inorder.length == 0){
+            return null;
+        }
+        return build(preorder, inorder, 0, preorder.length - 1, 0, inorder.length - 1);
+    }
+
+    public TreeNode build(int[] preorder, int[] inorder, int preLeft, int preRight, int inLeft, int inRight){
+        if(preLeft > preRight || inLeft > inRight){
+            return null;
+        }
+
+        int key = preorder[preLeft];
+        int index = 0;
+        TreeNode root = new TreeNode(key);
+        for(int i = inLeft;i <= inRight;i++){
+            if(key == inorder[i]){
+                index = i;
+                break;
+            }
+        }
+
+        int leftLength = index - inLeft;
+
+        root.left = build(preorder, inorder, preLeft+1, preLeft + leftLength, inLeft, index - 1);
+        root.right = build(preorder, inorder, preLeft + leftLength + 1, preRight, index + 1, inRight);
+        return root;
+    }
+}
+```
+
+#### 4、
+
